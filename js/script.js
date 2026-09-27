@@ -543,7 +543,7 @@ function subirCandelaHastaNivel(idNivel, duracionMs = DURACION_SUBIDA_NIVEL_MS) 
 
 function aplicarTransicionDeNivelCompletado(idCompletado) {
   // el nodo recién pasado se pinta de verde (transición CSS por el
-  // cambio de clase, ver estilos de .nivel en index.html)
+  // cambio de clase, ver estilos de .nivel en mapa.html)
   const nodoCompletado = document.querySelector(`.nivel[data-id="${idCompletado}"]`);
   if (nodoCompletado) {
     nodoCompletado.classList.remove('desbloqueado');

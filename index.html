@@ -58,18 +58,18 @@
           boton.classList.add('oculto');
         })
         .catch(() => {
-          window.location.href = 'index.html';
+          window.location.href = 'mapa.html';
         });
     });
 
     video.addEventListener('ended', () => {
-      window.location.href = 'index.html';
+      window.location.href = 'mapa.html';
     });
 
     // Si el video falla por algún motivo, no queremos dejar a Candela
     // trabada en una pantalla negra: pasamos directo al mapa.
     video.addEventListener('error', () => {
-      window.location.href = 'index.html';
+      window.location.href = 'mapa.html';
     });
   </script>
 </body>

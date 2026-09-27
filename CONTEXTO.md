@@ -11,10 +11,14 @@ build, sin `npm install`, sin Node, sin nada que requiera pasos previos).
 
 ## Cómo se abre la app
 Candela usa **Mac**. Doble clic en `Abrir Aplicación.command` (recomendado).
-Eso abre `intro.html` — **ya no `index.html` directo** — que reproduce un
-video de intro y, al terminar, pasa solo al mapa (`index.html`).
+Eso abre `index.html` (el video de intro; antes se llamaba `intro.html`) — que reproduce un
+video de intro y, al terminar, pasa solo al mapa (`mapa.html`).
 
-Flujo completo: `intro.html` (video) → termina el video → `index.html`
+Se renombró así (intro → `index.html`, mapa → `mapa.html`) para que en
+**GitHub Pages** la primera página que se vea al entrar a la URL sea la del
+video: GitHub Pages sirve `index.html` por defecto.
+
+Flujo completo: `index.html` (video) → termina el video → `mapa.html`
 (mapa) → al abrirse, la página hace un scroll automático de ~5 segundos
 que recorre todo el camino de niveles antes de quedar quieta.
 
@@ -39,7 +43,7 @@ vez de solo revisar el código a ojo.
 
 Comando base (ejemplo, ajustar rutas):
 ```bash
-WIN_PATH=$(wslpath -w "$(pwd)/index.html")
+WIN_PATH=$(wslpath -w "$(pwd)/mapa.html")
 "/mnt/c/Program Files/Google/Chrome/Application/chrome.exe" \
   --headless --disable-gpu --virtual-time-budget=3000 \
   --screenshot="C:\\Users\\luis\\AppData\\Local\\Temp\\captura.png" \
@@ -73,13 +77,13 @@ conviene probar así antes de asumir que algo funciona.
 
 ```
 feliz-cumpleaños/
-├── intro.html                 # Punto de entrada REAL: video intro → redirige a index.html
-├── index.html                 # El mapa de niveles
-├── Abrir Aplicación.command   # Lanzador amigable para Mac (abre intro.html)
+├── index.html                 # Punto de entrada REAL: video intro → redirige a mapa.html
+├── mapa.html                  # El mapa de niveles (antes se llamaba index.html)
+├── Abrir Aplicación.command   # Lanzador amigable para Mac (abre index.html)
 ├── CONTEXTO.md                # Este archivo
 ├── DIALOGOS.md                # Fuente de los 3 diálogos reales (ya migrados a js/conversaciones.js)
 ├── css/
-│   └── styles.css             # Sin usar por ahora (CSS va inline en index.html)
+│   └── styles.css             # Sin usar por ahora (CSS va inline en mapa.html)
 ├── escape.html                # Mini-juego final: sala de escape (tras completar los 20 niveles)
 ├── js/
 │   ├── script.js               # Lógica del mapa (estado, render, scroll de bienvenida, reto)
@@ -92,7 +96,7 @@ feliz-cumpleaños/
 │   ├── juego-2048.js           # Motor del 2048 (sala 2 del escape), sin DOM
 │   └── escape.js               # Lógica de escape.html (candado, sopa de letras o 2048, según la sala)
 ├── multimedia/                # Videos del proyecto
-│   ├── Intro.mp4               # Video de intro, se reproduce en intro.html
+│   ├── Intro.mp4               # Video de intro, se reproduce en index.html
 │   ├── 1.mp4, 2.mp4, 3.mp4      # Sin usar todavía (destino por definir)
 │   └── personajes.png          # Sin usar todavía
 └── assets/
@@ -101,8 +105,8 @@ feliz-cumpleaños/
 ```
 
 ## Estado actual
-`index.html` ahora tiene el **mapa de niveles funcional** (estilo Candy Crush).
-El CSS sigue inline en `<style>` dentro de `index.html` (decisión original:
+`mapa.html` ahora tiene el **mapa de niveles funcional** (estilo Candy Crush).
+El CSS sigue inline en `<style>` dentro de `mapa.html` (decisión original:
 "todo-en-uno" para simplicidad). El JS **ya se separó** a `js/script.js`
 (enlazado con `<script src="js/script.js"></script>`) — `css/styles.css`
 sigue sin usarse por ahora, se puede separar el CSS también más adelante
@@ -154,7 +158,7 @@ Los 2 escenarios ya tienen fondo real: escenario 1 (niveles 1-10)
 `multimedia/Mapas/mapa-0-10.jpg`, escenario 2 (niveles 11-20)
 `multimedia/Mapas/mapa-11-20.jpg` (agregada por el usuario). Se
 implementó con un `<div>` por escenario dentro de `#fondos-escenarios`
-(el primer hijo de `#mapa-wrapper` en `index.html`, para quedar siempre
+(el primer hijo de `#mapa-wrapper` en `mapa.html`, para quedar siempre
 detrás de las líneas/niveles/Candela):
 
 - **Alto**: medido y posicionado en JS (`posicionarFondosEscenarios()` +
@@ -217,7 +221,7 @@ Para agregarle fondo a un escenario nuevo (si en el futuro hay más de
 `js/script.js` — no hace falta tocar nada más, el ajuste de límites de
 arriba ya lo contempla automáticamente.
 
-### Video de intro (`intro.html`)
+### Video de intro (`index.html`)
 - Reproduce `multimedia/Intro.mp4` a pantalla completa.
 - **Requiere un toque/click en "▶ Toca para comenzar"** antes de reproducir:
   es a propósito, los navegadores bloquean el autoplay con sonido si no
@@ -225,19 +229,19 @@ arriba ya lo contempla automáticamente.
   audio del video se escuche. No es un bug ni algo que haya que sacar.
 - Al terminar el video (evento `ended`) o si falla la carga (evento
   `error`, para no dejar a Candela trabada en pantalla negra), redirige
-  automáticamente a `index.html`.
+  automáticamente a `mapa.html`.
 - Quedan sin usar todavía `1.mp4`, `2.mp4`, `3.mp4` y `personajes.png`
   (están en `multimedia/`) — falta definir para qué son (¿videos por
   escenario? ¿mini-juegos? ¿personajes del mapa?).
 
 ### Scroll de bienvenida en el mapa (`animarScrollDeBienvenida` en script.js)
-- Al cargar `index.html`, después de renderizar el mapa, anima el scroll
+- Al cargar `mapa.html`, después de renderizar el mapa, anima el scroll
   de la página desde arriba (el último nivel) hasta abajo (nivel 1,
   el primero) en ~5 segundos, con una curva suave (ease-in-out), usando
   `requestAnimationFrame` — no `scroll-behavior: smooth` de CSS, porque
   necesitábamos controlar la duración exacta.
-- Se ejecuta siempre que se abre/recarga `index.html` (no solo la primera
-  vez ni solo viniendo de `intro.html`).
+- Se ejecuta siempre que se abre/recarga `mapa.html` (no solo la primera
+  vez ni solo viniendo de `index.html`).
 - Si el mapa completo ya entra en la pantalla sin necesidad de scroll
   (pantallas muy altas), la función no hace nada.
 
@@ -253,7 +257,7 @@ estaba arriba del todo de la página con un fundido al abrir; se sacó de
 ahí a pedido del usuario y se movió al lado del último nivel).
 
 ### Secuencia de apertura del mapa (`iniciarSecuenciaDeApertura` en script.js)
-Al abrir `index.html`, además del scroll de bienvenida, pasa esto en
+Al abrir `mapa.html`, además del scroll de bienvenida, pasa esto en
 simultáneo (misma duración, `DURACION_APERTURA_MS = 5000`):
 
 - **Candela cayendo** (`multimedia/Candela/triste.png`, `#img-candela-
@@ -288,7 +292,7 @@ simultáneo (misma duración, `DURACION_APERTURA_MS = 5000`):
       de `position: fixed` ahí porque no hay scroll automático simultáneo.
   - El modal tiene `z-index: 100` (Candela tiene `z-index: 20`) para que,
     al abrir un nivel, el modal quede siempre por encima y no se solapen.
-- Esta secuencia solo se dispara una vez al abrir/recargar `index.html`,
+- Esta secuencia solo se dispara una vez al abrir/recargar `mapa.html`,
   no se repite si después el jugador pasa un nivel y el mapa se
   re-renderiza (`renderizarMapa()` no la vuelve a llamar). Si más adelante
   se quiere que Candela "camine" hacia la nueva casilla cada vez que se
@@ -313,7 +317,7 @@ Se cambió por una actualización puntual, en `aplicarTransicionDeNivelCompletad
 - El nodo recién completado cambia de clase (`desbloqueado` → `completado`)
   en el DOM existente (no se recrea), así el cambio de color de fondo
   anima solo gracias a `transition: background-color 0.5s ease;` puesto
-  en `.nivel` (index.html).
+  en `.nivel` (mapa.html).
 - La línea del camino que sale de ese nodo se busca por
   `line[data-desde="ID"]` (cada `<line>` ahora lleva `data-desde` con el
   id del nivel de origen, agregado en `dibujarLineas()`) y se le cambia
@@ -380,7 +384,7 @@ rooms online gratuitos tipo "Cazadores de Escapes" (enigma → código →
 - **Sin acceso manual desde el mapa** (a pedido del usuario, se sacó): el
   único camino a `escape.html` es el automático, al cerrar la última
   conversación tras completar el nivel 20. Antes había un link
-  `🔐 Ir a la Sala de Escape` en `index.html` para volver a entrar por si
+  `🔐 Ir a la Sala de Escape` en `mapa.html` para volver a entrar por si
   se cerraba el navegador a mitad de la sala de escape; se quitó junto
   con su CSS y `actualizarVisibilidadEscape()` en `js/script.js`. Si en
   algún momento hace falta poder reabrir la sala de escape sin rejugar
@@ -421,7 +425,7 @@ rooms online gratuitos tipo "Cazadores de Escapes" (enigma → código →
     del mapa). En ambos tipos, al completar la sala se llama a
     `avanzarASiguienteSala()`; al resolver la última, se muestra la
     pantalla de victoria con `MENSAJE_FINAL_ESCAPE` y un link para
-    volver al mapa (`index.html`). Tiene su propio botón de debug
+    volver al mapa (`mapa.html`). Tiene su propio botón de debug
     "Reiniciar sala de escape".
   - `js/sopa-letras.js` (nuevo): motor de la sopa de letras, sin nada de
     DOM (solo genera datos) — así se puede probar/reusar aparte.
@@ -567,9 +571,9 @@ teclado, fichas iguales que se tocan se fusionan al doble).
   bien se defina el texto real, alcanza con llenar ese array — no hace
   falta tocar nada de la lógica.
 - **`escape.html` ahora también carga `js/dialogo.js` y
-  `js/conversaciones.js`** (antes solo los cargaba `index.html`), y
+  `js/conversaciones.js`** (antes solo los cargaba `mapa.html`), y
   tiene su propia copia del overlay de diálogo (`#dialogo-overlay` y
-  el resto de los IDs, mismo CSS que en `index.html`) — así la
+  el resto de los IDs, mismo CSS que en `mapa.html`) — así la
   conversación de fallo se puede mostrar ahí también.
 - **Sobre el objetivo de 2048 puntos** (el usuario pidió avisar si lo
   veía muy grande): con movimientos completamente al azar (sin ninguna
@@ -729,7 +733,7 @@ que va cambiando de personaje y expresión según quién habla.
      `animarCandelaCayendo()`, en el mismo handler `alTerminarDeCaer` que
      ya cambiaba la cara triste por la normal, se llama a
      `mostrarDialogo(CONVERSACIONES.inicio)`. **Se dispara cada vez que
-     se abre o recarga `index.html`** (decisión tomada con el usuario:
+     se abre o recarga `mapa.html`** (decisión tomada con el usuario:
      no se guarda ningún flag de "ya la vi", a diferencia de lo que se
      podría hacer con `progreso`).
   2. **Al completar el nivel 10** (fin del primer escenario): en
@@ -775,11 +779,11 @@ por la conversación real (texto, personajes y expresiones en cada punto).
   se protege la "ñ" antes de normalizar y se restaura después. No afectaba
   a las 20 preguntas actuales (ninguna respuesta tiene "ñ"), pero sí a
   cualquier pregunta futura que la use.
-- **`intro.html`**: si `video.play()` fallaba tras el toque inicial (la
+- **`index.html`**: si `video.play()` fallaba tras el toque inicial (la
   promesa se rechaza), el botón "Toca para comenzar" ya se había ocultado,
   dejando a Candela con la pantalla en negro sin salida. Ahora el botón
   solo se oculta si `play()` confirma que arrancó; si falla, se pasa
-  directo a `index.html`.
+  directo a `mapa.html`.
 
 ## Decisiones tomadas
 - **Sin frameworks ni build tools**: para que "abrir y ya funciona" sea literal.

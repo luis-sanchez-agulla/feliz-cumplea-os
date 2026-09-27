@@ -7,7 +7,7 @@
 <style>
   /* ============================================
      ESTILOS MINIMOS - SOLO FUNCIONALES, SIN DISEÑO
-     (mismo criterio que index.html: primero que funcione)
+     (mismo criterio que mapa.html: primero que funcione)
      ============================================ */
   * { box-sizing: border-box; }
 
@@ -125,7 +125,7 @@
     overflow: hidden; /* contiene la imagen flotante de abajo, si no el fondo/borde quedan más bajos que ella */
   }
 
-  /* mismo ancho que #img-demonio-final en index.html (mapa de niveles) */
+  /* mismo ancho que #img-demonio-final en mapa.html (mapa de niveles) */
   #img-demonio-sopa {
     float: left;
     width: 220px;
@@ -200,7 +200,7 @@
   }
 
   /* misma imagen y mismo ancho que en la sala 1 (#img-demonio-sopa) y que
-     en el mapa (#img-demonio-final en index.html) */
+     en el mapa (#img-demonio-final en mapa.html) */
   #img-demonio-2048 {
     float: left;
     width: 220px;
@@ -254,7 +254,7 @@
     animation: destacar-celda-2048 0.15s ease-out;
   }
 
-  /* ---- Diálogo / cutscenes (mismo motor que index.html, ver js/dialogo.js) ---- */
+  /* ---- Diálogo / cutscenes (mismo motor que mapa.html, ver js/dialogo.js) ---- */
   #dialogo-overlay {
     position: fixed;
     inset: 0;
@@ -386,7 +386,7 @@
 
       <div id="zona-despedida">
         <p id="despedida-texto"></p>
-        <a href="index.html">← Volver al mapa</a>
+        <a href="mapa.html">← Volver al mapa</a>
       </div>
     </div>
   </div>
@@ -395,7 +395,7 @@
     <button id="btn-reiniciar-escape">Reiniciar sala de escape (debug)</button>
   </div>
 
-  <!-- Diálogo / cutscenes: mismo motor que index.html. Se usa al fallar el
+  <!-- Diálogo / cutscenes: mismo motor que mapa.html. Se usa al fallar el
        2048 (sala 2) y para la conversación final antes de la despedida (sala 4) -->
   <div id="dialogo-overlay" class="oculto">
     <img id="dialogo-personaje" alt="" />

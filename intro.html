@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Feliz Cumpleaños Candela</title>
+<style>
+  html, body {
+    margin: 0;
+    height: 100%;
+    background: #000;
+    overflow: hidden;
+  }
+
+  #video-intro {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+  }
+
+  #boton-comenzar {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    color: #fff;
+    border: none;
+    font-size: 22px;
+    font-family: sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  #boton-comenzar.oculto {
+    display: none;
+  }
+</style>
+</head>
+<body>
+  <video id="video-intro" src="multimedia/Intro.mp4" playsinline></video>
+  <button id="boton-comenzar">▶ Toca para comenzar</button>
+
+  <script>
+    // El navegador no deja reproducir video con sonido automáticamente,
+    // por eso se necesita este toque inicial (es lo que activa el permiso).
+    const video = document.getElementById('video-intro');
+    const boton = document.getElementById('boton-comenzar');
+
+    boton.addEventListener('click', () => {
+      // ocultamos el botón recién cuando confirmamos que el video arrancó;
+      // si play() falla (rechaza la promesa), pasamos directo al mapa en
+      // vez de dejar el botón oculto y a Candela con la pantalla negra
+      video.play()
+        .then(() => {
+          boton.classList.add('oculto');
+        })
+        .catch(() => {
+          window.location.href = 'index.html';
+        });
+    });
+
+    video.addEventListener('ended', () => {
+      window.location.href = 'index.html';
+    });
+
+    // Si el video falla por algún motivo, no queremos dejar a Candela
+    // trabada en una pantalla negra: pasamos directo al mapa.
+    video.addEventListener('error', () => {
+      window.location.href = 'index.html';
+    });
+  </script>
+</body>
+</html>

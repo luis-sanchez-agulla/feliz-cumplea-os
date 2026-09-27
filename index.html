@@ -3,326 +3,74 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Mapa de Niveles - Cumple de Candela</title>
+<title>Feliz Cumpleaños Candela</title>
 <style>
-  /* ============================================
-     ESTILOS MINIMOS - SOLO FUNCIONALES, SIN DISEÑO
-     ============================================ */
-  * { box-sizing: border-box; }
-
-  body {
+  html, body {
     margin: 0;
-    font-family: sans-serif;
-    background: #eee;
-    overflow-x: hidden; /* los fondos de escenario rompen el ancho con 100vw (ver .fondo-escenario) */
+    height: 100%;
+    background: #000;
+    overflow: hidden;
   }
 
-  header {
-    padding: 16px;
-    text-align: center;
-    background: #ddd;
-  }
-
-  #progreso-texto {
-    margin: 4px 0 0;
-    font-size: 14px;
-  }
-
-  #mapa-wrapper {
-    position: relative;
-    max-width: 500px;
-    margin: 0 auto;
-    padding: 40px 0;
-  }
-
-  #rutas {
-    position: absolute;
-    top: 0;
-    left: 0;
-    pointer-events: none;
-  }
-
-  /* Fondos temáticos por escenario: un <div> por escenario, ubicado y
-     medido en JS (calcularRangoVerticalEscenario en script.js) para que
-     cubra justo el alto de sus niveles, no todo el mapa. Van antes que
-     #rutas en el HTML para quedar siempre detrás de líneas/niveles/Candela. */
-  #fondos-escenarios {
-    position: absolute;
-    top: 0;
-    left: 0;
+  #video-intro {
     width: 100%;
-    pointer-events: none;
+    height: 100%;
+    object-fit: contain;
+    display: block;
   }
 
-  /* Full-bleed: rompe el ancho de 500px de #mapa-wrapper para que la
-     imagen cubra TODO el ancho de la pantalla, no solo la columna angosta
-     donde están los números. "left: 50%" + "translateX(-50%)" recentra
-     el div (ya de 100vw de ancho) respecto al centro de la pantalla, no
-     respecto a #mapa-wrapper. La posición vertical (top/height) sigue
-     viniendo del JS, en coordenadas de #mapa-wrapper. */
-  .fondo-escenario {
-    position: absolute;
-    left: 50%;
-    width: 100vw;
-    transform: translateX(-50%);
-    background-size: cover;
-    background-position: center;
-  }
-
-  /* Candela: en reposo vive en coordenadas del MAPA (position: absolute,
-     relativa a #mapa-wrapper), así que scrollea junto con el resto del
-     camino y se queda "pegada" a su nivel en vez de perseguir la pantalla. */
-  #img-candela-cayendo {
-    position: absolute;
-    top: 0;
-    left: 50%;
-    width: 200px;
-    height: auto;
-    transform: translateX(-50%) rotate(0deg);
-    transition: top 5s cubic-bezier(0.33, 0, 0.2, 1), left 5s cubic-bezier(0.33, 0, 0.2, 1), transform 5s cubic-bezier(0.33, 0, 0.2, 1);
-    pointer-events: none;
-    z-index: 20;
-  }
-
-  /* Solo durante la caída inicial se vuelve fija a la PANTALLA: así no se
-     desincroniza del scroll automático de bienvenida, que tiene su propio
-     ritmo de animación. Apenas aterriza, se saca esta clase (ver script.js). */
-  #img-candela-cayendo.cayendo-desde-arriba {
+  #boton-comenzar {
     position: fixed;
-  }
-
-  #camino {
-    display: flex;
-    flex-direction: column-reverse; /* nivel 1 abajo, va subiendo */
-    align-items: stretch;
-    gap: 50px;
-    position: relative;
-  }
-
-  .fila-nivel {
-    display: flex;
-    align-items: center;
+    inset: 0;
     width: 100%;
-    height: 60px; /* fijo: si no, la imagen del demonio (mucho más alta que
-      un círculo de nivel) infla el alto de su fila y descuadra el
-      espaciado del camino y los cálculos que miden el alto de las filas
-      (fondo de escenario, scroll de bienvenida) */
-  }
-
-  /* demonio con casita, al lado del último nivel (desafío final).
-     Más grande que su fila a propósito: sobresale visualmente gracias a
-     que .fila-nivel tiene overflow visible por defecto, sin empujar el
-     resto del camino. */
-  #img-demonio-final {
-    width: 220px;
-    height: auto;
-    margin-left: 10px;
-  }
-
-  /* zigzag simple: izquierda / centro / derecha, se repite (clase puesta por JS) */
-  .fila-izquierda { justify-content: flex-start; padding-left: 10%; }
-  .fila-centro     { justify-content: center; }
-  .fila-derecha    { justify-content: flex-end; padding-right: 10%; }
-
-  /* separador funcional entre escenarios (bloques de 10 niveles) */
-  .divisor-escenario {
-    text-align: center;
-    font-weight: bold;
-    color: #555;
-    border-top: 2px dashed #999;
-    padding-top: 10px;
-    margin-top: 10px;
-  }
-
-  .nivel {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    font-size: 18px;
+    background: rgba(0, 0, 0, 0.6);
     color: #fff;
-    border: 3px solid #333;
-    cursor: pointer;
-    user-select: none;
-    transition: background-color 0.5s ease; /* para que pasar a verde se vea animado */
-  }
-
-  /* la línea del camino también anima su color al pasar a verde */
-  #rutas line {
-    transition: stroke 0.5s ease;
-  }
-
-  .nivel.bloqueado {
-    background: #999;
-    cursor: not-allowed;
-  }
-
-  .nivel.desbloqueado {
-    background: #3b82f6; /* azul: disponible para jugar */
-  }
-
-  .nivel.completado {
-    background: #22c55e; /* verde: ya completado */
-  }
-
-  /* ---- Modal ---- */
-  #modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.5);
+    border: none;
+    font-size: 22px;
+    font-family: sans-serif;
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 100; /* por encima de Candela (z-index 20), para que no se solapen */
+    cursor: pointer;
   }
 
-  #modal-overlay.oculto {
+  #boton-comenzar.oculto {
     display: none;
-  }
-
-  #modal {
-    background: #fff;
-    padding: 24px;
-    border-radius: 8px;
-    min-width: 260px;
-    text-align: center;
-  }
-
-  #modal button {
-    margin: 8px 4px 0;
-    padding: 8px 16px;
-    cursor: pointer;
-  }
-
-  #modal-pregunta {
-    font-weight: bold;
-  }
-
-  #input-respuesta {
-    width: 100%;
-    padding: 8px;
-    font-size: 16px;
-    box-sizing: border-box;
-  }
-
-  #modal-feedback {
-    color: #dc2626;
-    min-height: 1.2em;
-  }
-
-  #zona-debug {
-    text-align: center;
-    padding: 20px;
-  }
-
-  #zona-debug button {
-    padding: 6px 12px;
-    cursor: pointer;
-  }
-
-  /* ---- Diálogo / cutscenes (conversaciones en puntos clave de la partida) ---- */
-  #dialogo-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.6); /* fondo oscurecido */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 24px;
-    z-index: 200; /* por encima del modal (100) y de Candela (20) */
-  }
-
-  #dialogo-overlay.oculto {
-    display: none;
-  }
-
-  #dialogo-personaje {
-    max-height: 38vh;
-    width: auto;
-    margin-bottom: -16px; /* se superpone levemente con la viñeta */
-    pointer-events: none;
-  }
-
-  /* la viñeta: caja central de bordes redondos con el texto */
-  #dialogo-vineta {
-    background: #fff;
-    border-radius: 24px;
-    padding: 20px 24px;
-    max-width: 420px;
-    width: 100%;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
-    text-align: center;
-  }
-
-  #dialogo-nombre {
-    margin: 0 0 8px;
-    font-weight: bold;
-    color: #d6336c;
-  }
-
-  #dialogo-texto {
-    margin: 0 0 14px;
-    font-size: 16px;
-    line-height: 1.4;
-  }
-
-  #btn-dialogo-siguiente {
-    padding: 8px 20px;
-    cursor: pointer;
   }
 </style>
 </head>
 <body>
+  <video id="video-intro" src="multimedia/Intro.mp4" playsinline></video>
+  <button id="boton-comenzar">▶ Toca para comenzar</button>
 
-  <header>
-    <h1>Mapa de Niveles 🎂</h1>
-    <p id="progreso-texto"></p>
-  </header>
+  <script>
+    // El navegador no deja reproducir video con sonido automáticamente,
+    // por eso se necesita este toque inicial (es lo que activa el permiso).
+    const video = document.getElementById('video-intro');
+    const boton = document.getElementById('boton-comenzar');
 
-  <div id="mapa-wrapper">
-    <div id="fondos-escenarios"><!-- fondos de cada escenario, generados por JS --></div>
-    <svg id="rutas"></svg>
-    <img id="img-candela-cayendo" src="multimedia/Candela/triste.png" alt="Candela" />
-    <div id="camino"><!-- los niveles se generan aquí por JS --></div>
-  </div>
+    boton.addEventListener('click', () => {
+      // ocultamos el botón recién cuando confirmamos que el video arrancó;
+      // si play() falla (rechaza la promesa), pasamos directo al mapa en
+      // vez de dejar el botón oculto y a Candela con la pantalla negra
+      video.play()
+        .then(() => {
+          boton.classList.add('oculto');
+        })
+        .catch(() => {
+          window.location.href = 'index.html';
+        });
+    });
 
-  <div id="zona-debug">
-    <button id="btn-reiniciar-progreso">Reiniciar progreso (debug)</button>
-  </div>
+    video.addEventListener('ended', () => {
+      window.location.href = 'index.html';
+    });
 
-  <!-- Modal de nivel -->
-  <div id="modal-overlay" class="oculto">
-    <div id="modal">
-      <h2 id="modal-titulo">Nivel</h2>
-      <p id="modal-estado"></p>
-      <div id="zona-reto">
-        <p id="modal-pregunta"></p>
-        <input type="text" id="input-respuesta" placeholder="Escribe tu respuesta" />
-        <p id="modal-feedback"></p>
-        <button id="btn-comprobar-respuesta">Comprobar respuesta</button>
-      </div>
-      <button id="btn-cerrar-modal">Cerrar</button>
-    </div>
-  </div>
-
-  <!-- Diálogo / cutscene: conversaciones en puntos clave de la partida -->
-  <div id="dialogo-overlay" class="oculto">
-    <img id="dialogo-personaje" alt="" />
-    <div id="dialogo-vineta">
-      <p id="dialogo-nombre"></p>
-      <p id="dialogo-texto"></p>
-      <button id="btn-dialogo-siguiente">Siguiente ▶</button>
-    </div>
-  </div>
-
-  <script src="js/normalizar.js"></script>
-  <script src="js/preguntas.js"></script>
-  <script src="js/conversaciones.js"></script>
-  <script src="js/dialogo.js"></script>
-  <script src="js/script.js"></script>
+    // Si el video falla por algún motivo, no queremos dejar a Candela
+    // trabada en una pantalla negra: pasamos directo al mapa.
+    video.addEventListener('error', () => {
+      window.location.href = 'intro.html';
+    });
+  </script>
 </body>
 </html>
